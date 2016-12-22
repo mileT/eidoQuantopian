@@ -28,7 +28,7 @@ def HitRate1( forecast, actual):
         elif forecast[i] < 0 and actual[i] > 0:
              fn = fn + 1
     hr = 1.0*(tp+tn)/(tp+tn+fn+fp)
-    return np.array([tp,tn,fp,fn]), hr
+    return tp,tn,fp,fn,hr
     
 def HitRate2( forecast, actual):  
     i = 0
@@ -46,21 +46,21 @@ def HitRate2( forecast, actual):
         elif forecast[i] < 0 and actual[i] >= 0:
              fn = fn + 1
     hr = 1.0*(tp+tn)/(tp+tn+fn+fp)
-    return np.array([tp,tn,fp,fn]), hr
+    return tp,tn,fp,fn,hr
  
 def HitRate( forecast, actual, types):
     if types == 1:
-        re, hr = HitRate1( forecast, actual)
+        tp,tn,fp,fn,hr = HitRate1( forecast, actual)
     if types == 2:
-        re, hr = HitRate2( forecast, actual)
-    return re, hr
+        tp,tn,fp,fn,hr = HitRate2( forecast, actual)
+    return tp,tn,fp,fn,hr
 
 # Test staff
-f = np.array([-1.0,2.0,-1.1,3.0,5.0, -0.3])
-a = np.array([1.0,-2.0,-1.1,3.2,-5.5, 0.4])
-x, x1 = HitRate(f, a, 1)
-y, y1 = HitRate(f, a, 2)
-print x
-print y
-print x1
-print y1
+#f = np.array([1.3,2.0,-1.3,3.0,5.0, -0.3])
+#a = np.array([1.0,-2.0,-1.1,3.2,-5.5, -0.4])
+#tp1,tn1,fp1,fn1,hr1= HitRate(f, a, 1)
+#tp2,tn2,fp2,fn2,hr2 = HitRate(f, a, 2)
+#output1 = np.array([tp1,tn1,fp1,fn1,hr1])
+#output2 = np.array([tp2,tn2,fp2,fn2,hr2])
+#print output1
+#print output2

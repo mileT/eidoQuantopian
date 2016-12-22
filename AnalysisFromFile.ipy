@@ -4,27 +4,68 @@ Created on Thu Dec 15 17:23:12 2016
 
 @author: jhan
 """
+import math
 import numpy as np
 import pandas as pd
+import scipy as sp
+import matplotlib as mpl 
+import matplotlib.pyplot as plt
+from scipy import stats
+from HitRate import HitRate
 
+# import file
 def import_stats_file(filename):
     df = pd.read_csv(filename, sep=',')
     return df
     
-df1 = import_stats_file('stats_type0_8_5.csv')  
-#print df1
-print  df1[0:3]
-    
-#    # init output virales
-#    patternID = ''
-#    endDate = ''
-#    actualReturn = 0
-#    mean = 0
-#    variance = 0
-#    median = 0
-#    upside = 0
-#    downside = 0
-#    num_results = 0
-#    
-#    # pearson correlation
-#    r_mean = np.corrcoef(df)
+df1 = import_stats_file('stats_type0_8_5.csv')
+
+# unc_median: median of unconditional space used in hit rate calculations
+#    !!!! Need update to calulate from row data file, for now use random number to run script
+df1['unc_median']= pd.Series(np.random.randn(),index=df1.index)
+
+ # Read each collumn
+patternID = df1['patternID']
+actualReturn = df1['actualReturn']
+mean1 = df1['mean']
+median = df1['median']
+variance = df1['variance']
+upside = df1['upside']
+downside = df1['downside']
+numSearchResults = df1['#searchResults']
+unc_median = df1['unc_median']
+# pearson correlation
+r_mean, p_mean = sp.stats.pearsonr(actualReturn,mean1)
+r_median, p_median = sp.stats.pearsonr(actualReturn,median)
+
+# spearman correaltion
+rs_mean, ps_mean = sp.stats.spearmanr(actualReturn,mean1)
+rs_median, ps_median = sp.stats.spearmanr(actualReturn,median)
+
+# number of lines in the file
+num_forecasts= len(df1.index)
+
+# calculate hit rate and 2d confusion matrix
+TP_median1, TN_median1, FP_median1, FN_median1, HR_median1 = HitRate(median, actualReturn, 1)
+TP_median2, TN_median2, FP_median2, FN_median2, HR_median2 = HitRate(median, actualReturn, 2)
+TP_unc1, TN_unc1, FP_unc1, FN_unc1, HR_unc1 = HitRate(unc_median, actualReturn, 1)
+TP_unc2, TN_unc2, FP_unc2, FN_unc2, HR_unc2 = HitRate(unc_median, actualReturn, 2)
+
+# MSE
+MSE_mean = np.sum((actualReturn-mean1)**2)/num_forecasts
+MSE_median = np.sum((actualReturn-median)**2)/num_forecasts
+
+# MAE
+MAE_mean = np.sum(np.abs(actualReturn-mean1))/num_forecasts
+MAE_median = np.sum(np.abs(actualReturn-median))/num_forecasts
+
+# caluclate spreads from sorted array
+sortedDf = df1.sort('mean', ascending =False)
+#print sorted_actualReturn
+q_size=math.floor(num_forecasts/10);
+rear_index =math.floor(num_forecasts-q_size)
+test = sortedDf.iloc[rear_index:num_forecasts-1,]
+sorted_actualReturn = test['actualReturn']
+print test.tail(4)
+#sorted_actualReturn.apply(lambda x: (x[np.isfinite(x)][:q_size]).sum(), axis=1)
+#DecileSpread = np.mean()
